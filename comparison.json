@@ -1,0 +1,15 @@
+{
+  "old": {
+    "correct": 200,
+    "total": 279,
+    "detected": 229,
+    "accuracy": 0.7168458781362007
+  },
+  "new": {
+    "correct": 277,
+    "total": 279,
+    "detected": 279,
+    "accuracy": 0.992831541218638
+  },
+  "note": "Same held-out load_digits identities and same simulated ROIs. Old model retrained using supplied original code. Synthetic generator matches new training assumptions; not real camera evidence. Missing detections count as incorrect."
+}
