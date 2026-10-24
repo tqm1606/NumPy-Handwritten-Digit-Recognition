@@ -1,0 +1,4 @@
+evaluation,split,samples,correct,accuracy,seed,evidence,scope
+clean_holdout_test,test,279,276,0.9892473118,42,"recomputed from included weights; evaluation.json","sklearn load_digits"
+synthetic_transformed_test,test_synthetic,,,0.9749103943,9876,"evaluation.json","synthetic transformations"
+simulated_camera_roi,test_simulated_roi,279,277,0.9928315412,2026,"comparison.json","simulated ROI; separate from physical webcam"
