@@ -1,0 +1,50 @@
+# Nhận diện chữ số viết tay — NumPy from scratch
+
+## Tuân thủ yêu cầu trong ảnh
+- Dataset duy nhất: `sklearn.datasets.load_digits()` (1.797 ảnh, 8×8, 10 nhãn 0–9).
+- Không TensorFlow, Keras, PyTorch, mô hình sklearn hoặc trọng số pretrained.
+- Mạng MLP 64 → 192 → 96 → 10, forward/backprop, Adam, chia dữ liệu và accuracy tự viết bằng NumPy.
+- OpenCV xử lý ảnh/camera và tạo biến thể từ dữ liệu sklearn. Không dùng dữ liệu ngoài.
+- Notebook đầy đủ nằm trong ZIP để nộp; không nộp link Colab/Kaggle.
+
+## Chạy trên Windows
+1. Giải nén toàn bộ ZIP, mở Terminal tại thư mục chứa các file.
+2. `python -m pip install -r requirements.txt`
+3. Mở notebook: `python -m notebook Nhan_Dien_Chu_So_From_Scratch.ipynb`
+4. Notebook đã có kết quả. Có thể Restart Kernel and Run All để tự huấn luyện lại, hoặc chạy `python train_from_scratch.py`.
+5. Camera với trọng số đi kèm: `python camera_digit_recognizer.py --source 0`
+   Đổi 0 thành 1 hoặc 2 nếu cần. `python list_cameras.py` giúp tìm camera.
+6. Kiểm tra kỹ thuật: `python verify.py`.
+
+Dùng `opencv-python` có giao diện cho camera; không cài đồng thời bản headless. Camera cần chạy trên máy có webcam và quyền truy cập webcam. Trong Jupyter, kernel cần dùng đúng môi trường vừa cài gói.
+
+## Cách đưa chữ vào camera
+Đưa một chữ số vào giữa khung, nền tương đối đều, nét liền rõ, không chạm mép. Hỗ trợ nét tối/nền sáng và nét sáng/nền tối. Quan sát ô 8×8: nếu nét bị mất, chỉnh ánh sáng/khoảng cách/vị trí. Nhấn q để thoát. Chương trình phân loại từng chữ số 0–9, không đọc chuỗi nhiều chữ số hay chữ cái.
+
+## Cải tiến
+- Tách nền sáng/tối tự động; bỏ nhiễu, component chạm mép; chỉ giữ nét chính với quầng xám sát nét.
+- Chung hàm tiền xử lý giữa camera và ảnh mô phỏng dùng huấn luyện.
+- Kết hợp ảnh gốc, affine augmentation và mô phỏng giấy/ánh sáng từ chính load_digits.
+- Chọn checkpoint bằng validation, không dùng test. Split được thực hiện trước augmentation.
+- Trung bình ba cách crop và năm frame; xóa lịch sử khi ảnh đổi mạnh để giảm lưu nhãn cũ.
+- Hiện “không chắc” khi xác suất dưới 60% hoặc chênh lệch hai lớp đầu dưới 15%. Đây là ngưỡng giao diện cố định, không phải xác suất đã hiệu chuẩn.
+- Chọn camera bằng --source; hỗ trợ backend Windows và mặc định trên hệ điều hành khác.
+
+## Kết quả đã chạy
+Train gốc 1.252; validation 266; test 279. Seed chia tập 42.
+
+| Kiểm tra | Bản cũ (huấn luyện lại code được gửi) | Bản mới |
+|---|---:|---:|
+| Test sklearn sạch | 277/279 (99,28%) | 276/279 (98,92%) |
+| 279 ROI mô phỏng camera từ cùng test | 200/279 (71,68%) | 277/279 (99,28%) |
+
+Accuracy sạch giảm một mẫu, trong khi thử nghiệm mô phỏng camera cải thiện. ROI mô phỏng sử dụng seed 2026, hàm `render_camera_sample` và dự đoán ba crop; không phát hiện được chữ tính là sai. Bộ mô phỏng có cùng giả định với augmentation của bản mới nên có lợi cho bản mới; không đại diện đầy đủ camera thực tế. Không dùng kết quả test này để chọn lại tham số/checkpoint.
+
+`evaluation.json` chứa lịch sử validation, confusion matrix, test sạch và test gồm ảnh biến đổi (97,49%). `comparison.json` chứa kết quả đối chiếu ROI. Chưa kiểm thử webcam vật lý; không cam kết camera đạt các tỷ lệ trên. Component nét rời có thể bị bỏ, bóng mạnh/nền phức tạp có thể gây sai.
+
+## Kiểm chứng
+- Toàn bộ ô code notebook được thực thi lần lượt trong một tiến trình Python mới; có lưu output và biểu đồ. Môi trường tạo file không cho mở socket kernel Jupyter nên chưa kiểm tra trực tiếp giao diện Run All tại đây.
+- Gradient backprop khớp sai phân hữu hạn trên mạng nhỏ; split không trùng; xác suất sau save/load khớp; khung một màu bị từ chối.
+- Kiểm tra cú pháp tất cả file Python thành công.
+- Trọng số đi kèm được sinh lại bởi notebook, không dùng trọng số cũ không rõ quá trình huấn luyện.
+
